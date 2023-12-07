@@ -4,22 +4,34 @@ using UnityEngine;
 
 public class GameLogic : MonoBehaviour
 {
-    GameObject character;
+
     Vector2 characterVelocityInPercent;
     Vector2 characterPositionInPercent;
  
+    Dictionary<int, Character> players = new Dictionary<int, Character>();
     void Start()
     {
-       
         NetworkClientProcessing.SetGameLogic(this);
-
-        Sprite circleTexture = Resources.Load<Sprite>("Circle");
-
-        character = new GameObject("Character");
-
-        character.AddComponent<SpriteRenderer>();
-        character.GetComponent<SpriteRenderer>().sprite = circleTexture;
     }
+
+    public void CreateNewPlayer(int id, float posX, float posY)
+    {
+        GameObject character = new GameObject("Character");
+        character.AddComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Circle");
+        Character newCharacter = character.AddComponent<Character>();
+        newCharacter.SetInitialPosition(posX, posY);
+        players.Add(id, newCharacter);
+    }
+
+    public void RemovePlayer(int playerId)
+    {
+        if(players.ContainsKey(playerId)) 
+        {
+            Destroy(players[playerId].gameObject);
+            players.Remove(playerId);
+        }
+    }
+
     void Update()
     {
 
@@ -52,25 +64,29 @@ public class GameLogic : MonoBehaviour
             else if (Input.GetKey(KeyCode.S))
                 SendIuputToServer(InputSendToSever.sKey);
         }
-        
-        AddVelocity(characterVelocityInPercent.x, characterVelocityInPercent.y);
 
+        MovePlayers();
     }
 
     void SendIuputToServer(int input)
     {
         NetworkClientProcessing.SendMessageToServer($"{ClientToServerSignifiers.PlayerInput},{input}", TransportPipeline.FireAndForget);
     }
-    public void AddVelocity( float velocityX, float velocityY)
+    public void AddVelocity(int id, float velocityX, float velocityY)
     {
-        characterVelocityInPercent.x = velocityX;
-        characterVelocityInPercent.y = velocityY;
-        characterPositionInPercent += (characterVelocityInPercent * Time.deltaTime);
+        if (players.ContainsKey(id))
+        {
+            players[id].velocityInPercent = new Vector2(velocityX, velocityY);
+        }
+    }
 
-        Vector2 screenPos = new Vector2(characterPositionInPercent.x * (float)Screen.width, characterPositionInPercent.y * (float)Screen.height);
-        Vector3 characterPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0));
-        characterPos.z = 0;
-        character.transform.position = characterPos;
+    public void MovePlayers()
+    {
+        foreach (var playerEntry in players)
+        {
+            Character character = playerEntry.Value;
+            character.UpdatePosition();
+        }
     }
 }
 

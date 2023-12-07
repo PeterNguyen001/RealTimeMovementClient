@@ -8,17 +8,26 @@ static public class NetworkClientProcessing
     #region Send and Receive Data Functions
     static public void ReceivedMessageFromServer(string msg, TransportPipeline pipeline)
     {
-        const int velocityX = 1;
-        const int velocityY = 2;
+        const int playerId =  1;
+        const int vec2X = 2;
+        const int vec2Y = 3;
 
         Debug.Log("Network msg received =  " + msg + ", from pipeline = " + pipeline);
 
         string[] csv = msg.Split(',');
         int signifier = int.Parse(csv[0]);
 
-        if (signifier == ServerToClientSignifiers.PlayerVelocity)
+        if(signifier == ServerToClientSignifiers.CreateNewPlayer)
         {
-            gameLogic.AddVelocity(float.Parse(csv[velocityX]), float.Parse(csv[velocityY]));
+            gameLogic.CreateNewPlayer(int.Parse(csv[playerId]), float.Parse(csv[vec2X]), float.Parse(csv[vec2Y]));
+        }
+        else if (signifier == ServerToClientSignifiers.PlayerVelocity)
+        {
+            gameLogic.AddVelocity(int.Parse(csv[playerId]) ,float.Parse(csv[vec2X]), float.Parse(csv[vec2Y]));
+        }
+        else if(signifier == ServerToClientSignifiers.RemovePlayer)
+        {
+
         }
     }
 
@@ -79,6 +88,7 @@ static public class ClientToServerSignifiers
 {
     public const int asd = 1;
     public const int PlayerInput = 2;
+    public const int updateHeartbeat = 5;
 }
 
 static public class ServerToClientSignifiers
@@ -86,6 +96,8 @@ static public class ServerToClientSignifiers
     public const int asd = 1;
     public const int PlayerVelocity = 2;
     public const int OtherPlayersVelocity = 3;
+    public const int CreateNewPlayer = 4;
+    public const int RemovePlayer = 5;
 }
 
 #endregion

@@ -1,20 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-    Vector2 characterVelocityInPercent;
-    Vector2 characterPositionInPercent;
-    // Start is called before the first frame update
-    void Start()
+    public Vector2 velocityInPercent;
+    private Vector2 positionInPercent;
+
+    public void SetInitialPosition(float posX, float posY)
     {
-        
+        positionInPercent = new Vector2(posX, posY);
+        UpdatePosition();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UpdatePosition()
     {
-        
+        positionInPercent += (velocityInPercent * Time.deltaTime);
+        Vector2 screenPos = new Vector2(positionInPercent.x * Screen.width, positionInPercent.y * Screen.height);
+        Vector3 newPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0));
+        newPos.z = 0;
+        transform.position = newPos;
     }
 }

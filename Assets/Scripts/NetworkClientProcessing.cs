@@ -8,22 +8,18 @@ static public class NetworkClientProcessing
     #region Send and Receive Data Functions
     static public void ReceivedMessageFromServer(string msg, TransportPipeline pipeline)
     {
+        const int velocityX = 1;
+        const int velocityY = 2;
+
         Debug.Log("Network msg received =  " + msg + ", from pipeline = " + pipeline);
 
         string[] csv = msg.Split(',');
         int signifier = int.Parse(csv[0]);
 
-        // if (signifier == ServerToClientSignifiers.asd)
-        // {
-
-        // }
-        // else if (signifier == ServerToClientSignifiers.asd)
-        // {
-
-        // }
-
-        //gameLogic.DoSomething();
-
+        if (signifier == ServerToClientSignifiers.PlayerVelocity)
+        {
+            gameLogic.AddVelocity(float.Parse(csv[velocityX]), float.Parse(csv[velocityY]));
+        }
     }
 
     static public void SendMessageToServer(string msg, TransportPipeline pipeline)
@@ -82,11 +78,14 @@ static public class NetworkClientProcessing
 static public class ClientToServerSignifiers
 {
     public const int asd = 1;
+    public const int PlayerInput = 2;
 }
 
 static public class ServerToClientSignifiers
 {
     public const int asd = 1;
+    public const int PlayerVelocity = 2;
+    public const int OtherPlayersVelocity = 3;
 }
 
 #endregion
